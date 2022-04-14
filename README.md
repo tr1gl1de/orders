@@ -34,7 +34,7 @@ dotnet restore
 dotnet tool restore
 dotnet ef database update
 ```
-4. Для запуска выполниет данную команду в директории проекта:
+4. Для запуска выполняет данную команду в директории проекта:
 ```shell
 dotnet run
 ```
