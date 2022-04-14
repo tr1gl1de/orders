@@ -1,4 +1,5 @@
 using System.Net.Mime;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,10 +12,12 @@ namespace Orders.Order;
 public class Controller : ControllerBase
 {
     private readonly DatabaseContext _context;
+    private readonly IMapper _mapper;
 
-    public Controller(DatabaseContext context)
+    public Controller(DatabaseContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
 
     /// <summary>Create a new order.</summary>
@@ -24,29 +27,13 @@ public class Controller : ControllerBase
     [ProducesResponseType(typeof(ReadOrderDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto createOrderDto)
     {
-        var newOrder = new OrderEntity
-        {
-            Id = Guid.NewGuid(),
-            AdressReceiver = createOrderDto.AdressReceiver,
-            AdressSender = createOrderDto.AdressSender,
-            CityReceiver = createOrderDto.CityReceiver,
-            CitySender = createOrderDto.CitySender,
-            Weight = createOrderDto.Weight,
-            DateReceiving = DateTime.Now
-        };
+        var newOrder = _mapper.Map<OrderEntity>(createOrderDto);
+        
         _context.Orders.Add(newOrder);
         await _context.SaveChangesAsync();
 
-        var readOrderDto = new ReadOrderDto
-        {
-            Id = newOrder.Id,
-            AdressReceiver = newOrder.AdressReceiver,
-            AdressSender = newOrder.AdressSender,
-            CityReceiver = newOrder.CityReceiver,
-            CitySender = newOrder.CitySender,
-            Weight = newOrder.Weight,
-            DateReceiving = newOrder.DateReceiving
-        };
+        var readOrderDto = _mapper.Map<ReadOrderDto>(newOrder);
+        
         return Ok(readOrderDto);
     }
 
@@ -57,16 +44,7 @@ public class Controller : ControllerBase
     public async Task<IActionResult> GetOrders()
     {
         var orders = await _context.Orders.ToListAsync();
-        var readOrderDto = orders.Select(order => new ReadOrderDto
-        {
-            Id = order.Id,
-            AdressReceiver = order.AdressReceiver,
-            AdressSender = order.AdressSender,
-            CityReceiver = order.CityReceiver,
-            CitySender = order.CitySender,
-            Weight = order.Weight,
-            DateReceiving = order.DateReceiving
-        });
+        var readOrderDto = _mapper.Map<ICollection<ReadOrderDto>>(orders);
 
         return Ok(readOrderDto);
     }
@@ -84,16 +62,7 @@ public class Controller : ControllerBase
         if (order is null)
             return NotFound();
 
-        var readOrderDto = new ReadOrderDto
-        {
-            Id = order.Id,
-            AdressReceiver = order.AdressReceiver,
-            AdressSender = order.AdressSender,
-            CityReceiver = order.CityReceiver,
-            CitySender = order.CitySender,
-            Weight = order.Weight,
-            DateReceiving = order.DateReceiving
-        };
+        var readOrderDto = _mapper.Map<ReadOrderDto>(order);
         return Ok(readOrderDto);
     }
 
@@ -111,16 +80,7 @@ public class Controller : ControllerBase
             return NotFound();
         _context.Orders.Remove(deleteOrder);
         await _context.SaveChangesAsync();
-        var readOrderDto = new ReadOrderDto
-        {
-            Id = deleteOrder.Id,
-            AdressReceiver = deleteOrder.AdressReceiver,
-            AdressSender = deleteOrder.AdressSender,
-            CityReceiver = deleteOrder.CityReceiver,
-            CitySender = deleteOrder.CitySender,
-            Weight = deleteOrder.Weight,
-            DateReceiving = deleteOrder.DateReceiving
-        };
+        var readOrderDto = _mapper.Map<ReadOrderDto>(deleteOrder);
         return Ok(readOrderDto);
     }
 }
