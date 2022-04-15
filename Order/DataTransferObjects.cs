@@ -16,7 +16,7 @@ public class CreateOrderDto
     [Required]
     [MaxLength(100)]
     [RegularExpression(@"[a-zA-Zа-яА-Я\,0-9\-\s\.]*$")]
-    public string AdressSender { get; set; } = string.Empty;
+    public string AddressSender { get; set; } = string.Empty;
 
     /// <summary>Город получателя</summary>
     /// <example>Подольск</example>
@@ -30,7 +30,7 @@ public class CreateOrderDto
     [Required]
     [MaxLength(100)]
     [RegularExpression(@"[a-zA-Zа-яА-Я\,0-9\-\s\.]*$")]
-    public string AdressReceiver { get; set; } = string.Empty;
+    public string AddressReceiver { get; set; } = string.Empty;
 
     /// <summary>Вес посылки (кг)</summary>
     /// <example>2.5</example>
@@ -57,7 +57,7 @@ public class ReadOrderDto
     [Required]
     [MaxLength(100)]
     [RegularExpression(@"[a-zA-Zа-яА-Я\,0-9\-\s\.]*$")]
-    public string AdressSender { get; set; } = string.Empty;
+    public string AddressSender { get; set; } = string.Empty;
 
     /// <summary>Город получателя</summary>
     /// <example>Подольск</example>
@@ -71,7 +71,7 @@ public class ReadOrderDto
     [Required]
     [MaxLength(100)]
     [RegularExpression(@"[a-zA-Zа-яА-Я\,0-9\-\s\.]*$")]
-    public string AdressReceiver { get; set; } = string.Empty;
+    public string AddressReceiver { get; set; } = string.Empty;
 
     /// <summary>Вес посылки (кг)</summary>
     /// <example>2.5</example>

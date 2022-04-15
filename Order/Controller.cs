@@ -27,8 +27,8 @@ public class Controller : ControllerBase
         var newOrder = new OrderEntity
         {
             Id = Guid.NewGuid(),
-            AdressReceiver = createOrderDto.AdressReceiver,
-            AdressSender = createOrderDto.AdressSender,
+            AddressReceiver = createOrderDto.AddressReceiver,
+            AddressSender = createOrderDto.AddressSender,
             CityReceiver = createOrderDto.CityReceiver,
             CitySender = createOrderDto.CitySender,
             Weight = createOrderDto.Weight,
