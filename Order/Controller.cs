@@ -83,14 +83,13 @@ public class Controller : ControllerBase
         var oldOrder = await _context.Orders.SingleOrDefaultAsync(order => order.Id == id);
         if (oldOrder is null)
             return NotFound();
-        oldOrder = new OrderEntity
-        {
-            AddressReceiver = updateOrderDto.AddressReceiver,
-            AddressSender = updateOrderDto.AddressSender,
-            CityReceiver = updateOrderDto.CityReceiver,
-            CitySender = updateOrderDto.CitySender,
-            Weight = updateOrderDto.Weight
-        };
+        
+        oldOrder.AddressReceiver = updateOrderDto.AddressReceiver;
+        oldOrder.AddressSender = updateOrderDto.AddressSender;
+        oldOrder.CityReceiver = updateOrderDto.CityReceiver;
+        oldOrder.CitySender = updateOrderDto.CitySender;
+        oldOrder.Weight = updateOrderDto.Weight;
+        
         await _context.SaveChangesAsync();
         return NoContent();
     }
