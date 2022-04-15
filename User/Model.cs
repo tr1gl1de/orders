@@ -1,12 +1,14 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace Orders.User;
 
 [Table("users")]
+[Index(nameof(Username), IsUnique = true)]
 public class UserEntity
 {
     [Column("id")]
-    public Guid id { get; set; }
+    public Guid Id { get; set; }
     
     [Column("display_name")]
     public string DisplayName { get; set; }
