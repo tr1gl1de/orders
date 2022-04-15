@@ -8,7 +8,7 @@ public class RegisterUserDto
     /// <example>Jonh Doe</example>
     [Required]
     [MaxLength(50)]
-    [RegularExpression(@"^[a-zA-Zа-ЯА-Я\s]*$")]
+    [RegularExpression(@"^[\w\s]*$")]
     public string DisplayName { get; set; }
     
     /// <summary>Username for authorization</summary>
