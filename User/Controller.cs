@@ -1,8 +1,13 @@
+using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Orders.User;
 
+[ApiController]
+[Route("/users")]
+[Consumes(MediaTypeNames.Application.Json)]
+[Produces(MediaTypeNames.Application.Json)]
 public class UserController : ControllerBase
 {
     private readonly DatabaseContext _context;
