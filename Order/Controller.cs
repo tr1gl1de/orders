@@ -70,6 +70,31 @@ public class Controller : ControllerBase
         return Ok(readOrderDto);
     }
 
+    /// <summary>Update order with matching id.</summary>
+    /// <param name="id" example="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">Order id.</param>
+    /// <param name="updateOrderDto">Object order.</param>
+    /// <response code="204">Updated order.</response>
+    /// <response code="404">Order with specified id was not found.</response>
+    [HttpPut("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateOrder([FromRoute] Guid id,UpdateOrderDto updateOrderDto)
+    {
+        var oldOrder = await _context.Orders.SingleOrDefaultAsync(order => order.Id == id);
+        if (oldOrder is null)
+            return NotFound();
+        oldOrder = new OrderEntity
+        {
+            AddressReceiver = updateOrderDto.AddressReceiver,
+            AddressSender = updateOrderDto.AddressSender,
+            CityReceiver = updateOrderDto.CityReceiver,
+            CitySender = updateOrderDto.CitySender,
+            Weight = updateOrderDto.Weight
+        };
+        await _context.SaveChangesAsync();
+        return NoContent();
+    }
+
     /// <summary>Delete order with matching id.</summary>
     /// <param name="id" example="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">Order id.</param>
     /// <response code="200">Deleted order.</response>
