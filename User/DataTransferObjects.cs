@@ -41,3 +41,27 @@ public class ReadUserDto
     /// <example>jonh_doe333</example>
     public string Username { get; set; }
 }
+
+public class AuthenticateUserDto
+{
+    /// <summary>Username for authorization</summary>
+    /// <example>jonh_doe333</example>
+    [Required]
+    public string Username { get; set; }
+    
+    /// <summary>Password for authorization</summary>
+    /// <example>pass333</example>
+    [Required]
+    public string Password { get; set; }
+}
+
+public class TokenPairDto
+{
+    /// <summary>JWT Access Token.</summary>
+    /// <example>header.payload.signature</example>
+    public string AccessToken { get; set; }
+    
+    /// <summary>JWT Refresh Token.</summary>
+    /// <example>header.payload.signature</example>
+    public string RefreshToken { get; set; }
+}
