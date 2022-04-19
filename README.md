@@ -28,12 +28,18 @@ Linux или Windows с установленным .NET SDK 6,
 -----------
 
 1. Перед запуском внести изменения в файл appsettings.Development.json
- в соответствии с вашей конфигурацией PostgreSQL
+ в соответствии с вашей конфигурацией PostgreSQL, а также изменить конфигурацию 
+ JWT.
  
 ```json
 {
   "ConnectionStrings": {
     "PostgreSQL" : "Server=localhost;Port=5432;Database=your_name_db;User Id=db_user;Password=your_password"
+  },
+  "JwtAuth" : {
+    "Secret" : "32-chars long key to sign tokens",
+    "AccessTokenLifetime" : "15", 
+    "RefreshTokenLifetime" : "7"
   }
 }
 ```
