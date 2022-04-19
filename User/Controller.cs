@@ -79,7 +79,15 @@ public class UserController : ControllerBase
         return Ok(readUserDto);
     }
 
+    /// <summary>Authenticate the user.</summary>
+    /// <param name="authUserDto">User authentication info.</param>
+    /// <response code="200">Authentication token pair for specified user credentials.</response>
+    /// <response code="404">User with specified username does not exist.</response>
+    /// <response code="409">Incorrect password was specified.</response>
     [HttpPost("authenticate")]
+    [ProducesResponseType(typeof(TokenPairDto),StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> AuthenticateUser([FromBody] AuthenticateUserDto authUserDto)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == authUserDto.Username);
@@ -109,7 +117,15 @@ public class UserController : ControllerBase
         return Ok(tokenPairDto);
     }
 
+    /// <summary>Refresh token pair.</summary>
+    /// <param name="refreshToken">Refresh token.</param>
+    /// <response code="200">A new token pair.</response>
+    /// <response code="400">Invalid refresh token was provided.</response>
+    /// <response code="409">Provided refresh token has already been used.</response>
     [HttpPost("refresh")]
+    [ProducesResponseType(typeof(TokenPairDto),StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> RefreshTokenPair([FromBody] string refreshToken)
     {
         var refreshTokenClaims = _jwtTokenHelper.ParseToken(refreshToken);
