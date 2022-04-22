@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Orders;
@@ -11,9 +12,10 @@ using Orders;
 namespace Orders.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20220421201650_NewIterRoles")]
+    partial class NewIterRoles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -101,8 +103,7 @@ namespace Orders.Migrations
 
                     b.Property<int[]>("Roles")
                         .IsRequired()
-                        .HasColumnType("integer[]")
-                        .HasColumnName("roles");
+                        .HasColumnType("integer[]");
 
                     b.Property<string>("Username")
                         .IsRequired()

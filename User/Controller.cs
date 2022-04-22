@@ -1,11 +1,7 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Net.Mime;
-using System.Security.Claims;
-using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Orders.Helpers;
 
 namespace Orders.User;
@@ -25,6 +21,14 @@ public class UserController : ControllerBase
         _context = context;
         _configuration = configuration;
         _jwtTokenHelper = jwtTokenHelper;
+    }
+
+    [HttpGet("[action]")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetAllUsers()
+    {
+        var users = await _context.Users.ToListAsync();
+        return Ok(users);
     }
 
     [HttpGet("who-am-i")]
@@ -108,7 +112,7 @@ public class UserController : ControllerBase
         _context.RefreshTokens.Add(refreshTokenEntity);
         await _context.SaveChangesAsync();
 
-        var tokenPair = _jwtTokenHelper.IssuerTokenPair(user.Id, refreshTokenEntity.Id);
+        var tokenPair = _jwtTokenHelper.IssuerTokenPair(user.Id, refreshTokenEntity.Id, user.Roles);
         var tokenPairDto = new TokenPairDto
         {
             AccessToken = tokenPair.AccessToken,
@@ -146,7 +150,11 @@ public class UserController : ControllerBase
         await _context.SaveChangesAsync();
 
         var userId = Guid.Parse(refreshTokenClaims["sub"]);
-        var refreshTokenLifetime = int.Parse(_configuration["JwtAuth:RefreshTokenLifetim"]);
+        var refreshTokenLifetime = int.Parse(_configuration["JwtAuth:RefreshTokenLifetime"]);
+        List<Role> userRoles = refreshTokenClaims["role"]
+            .Select(role => Enum.Parse<Role>(role.ToString()))
+            .ToList();
+
         var newRefreshTokenEntity = new RefreshTokenEntity
         {
             Id = Guid.NewGuid(),
@@ -156,7 +164,7 @@ public class UserController : ControllerBase
         _context.RefreshTokens.Add(newRefreshTokenEntity);
         await _context.SaveChangesAsync();
 
-        var tokenPair = _jwtTokenHelper.IssuerTokenPair(userId, newRefreshTokenEntity.Id);
+        var tokenPair = _jwtTokenHelper.IssuerTokenPair(userId, newRefreshTokenEntity.Id,userRoles);
         var tokenPairDto = new TokenPairDto
         {
             AccessToken = tokenPair.AccessToken,

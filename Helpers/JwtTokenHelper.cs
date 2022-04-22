@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Orders.User;
@@ -72,20 +73,30 @@ public class JwtTokenHelper
         return encodedToken;
     }
 
-    public TokenPair IssuerTokenPair(Guid userId, Guid refreshTokenId)
+    public TokenPair IssuerTokenPair(Guid userId, Guid refreshTokenId, List<Role> userRoles)
     {
+        var accessClaims = new Dictionary<string, object>
+        {
+            {"sub", userId}
+        };
+        var refreshClaims = new Dictionary<string, object>
+        {
+            {"sub", userId},
+            {"jti", refreshTokenId}
+        };
+        
+        foreach (var role in userRoles)
+        {
+            accessClaims.Add(ClaimTypes.Role, Enum.GetName(typeof(Role),role));
+            refreshClaims.Add(ClaimTypes.Role, Enum.GetName(typeof(Role), role));
+        }
+        
         var accessToken = IssueToken(
-            new Dictionary<string, object>
-            {
-                {"sub", userId}
-            },
+            accessClaims,
             _accessTokenLifetime);
 
-        var refreshToken = IssueToken(new Dictionary<string, object>
-            {
-                {"sub", userId},
-                {"jti", refreshTokenId}
-            },
+        var refreshToken = IssueToken(
+            refreshClaims,
             _refreshTokenLifetime);
         return new TokenPair(accessToken, refreshToken);
     }

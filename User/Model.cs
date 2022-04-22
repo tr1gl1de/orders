@@ -18,6 +18,9 @@ public class UserEntity
     
     [Column("password")]
     public string Password { get; set; }
+
+    [Column("roles")]
+    public List<Role> Roles { get; set; } = new List<Role>() {Role.User};
 }
 
 [Table("refresh_tokens")]
@@ -31,4 +34,11 @@ public class RefreshTokenEntity
     
     [Column("expiration_time")]
     public DateTime ExpirationTime { get; set; }
+}
+
+public enum Role
+{
+    User,
+    Worker,
+    Admin
 }

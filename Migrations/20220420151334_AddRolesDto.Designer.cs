@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Orders;
@@ -11,9 +12,10 @@ using Orders;
 namespace Orders.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20220420151334_AddRolesDto")]
+    partial class AddRolesDto
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -102,7 +104,7 @@ namespace Orders.Migrations
                     b.Property<int[]>("Roles")
                         .IsRequired()
                         .HasColumnType("integer[]")
-                        .HasColumnName("roles");
+                        .HasColumnName("role");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -115,6 +117,16 @@ namespace Orders.Migrations
                         .IsUnique();
 
                     b.ToTable("users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("cc2fcbb5-8ce2-4cd3-bf53-7614253b5bd0"),
+                            DisplayName = "Administrator",
+                            Password = "$2a$11$E7rZNnsO1Rf42q8BXF2wJOLozNrgDQs9DNbupAfzxLSCfBp3gLBFK",
+                            Roles = new[] { 2 },
+                            Username = "admin"
+                        });
                 });
 #pragma warning restore 612, 618
         }

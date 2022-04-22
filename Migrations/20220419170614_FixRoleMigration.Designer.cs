@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Orders;
@@ -11,9 +12,10 @@ using Orders;
 namespace Orders.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20220419170614_FixRoleMigration")]
+    partial class FixRoleMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -99,10 +101,9 @@ namespace Orders.Migrations
                         .HasColumnType("text")
                         .HasColumnName("password");
 
-                    b.Property<int[]>("Roles")
-                        .IsRequired()
-                        .HasColumnType("integer[]")
-                        .HasColumnName("roles");
+                    b.Property<int>("Role")
+                        .HasColumnType("integer")
+                        .HasColumnName("role");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -115,6 +116,16 @@ namespace Orders.Migrations
                         .IsUnique();
 
                     b.ToTable("users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("15e5c330-7a98-4c33-8c21-4226bdcaf0f5"),
+                            DisplayName = "Administrator",
+                            Password = "$2a$11$sPvMVwoms.yYUj3MKVgJwuKx57MItFdd1LtADvqGqODFGLBf7ecHG",
+                            Role = 2,
+                            Username = "admin"
+                        });
                 });
 #pragma warning restore 612, 618
         }
