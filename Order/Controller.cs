@@ -23,6 +23,7 @@ public class Controller : ControllerBase
     /// <param name="createOrderDto">Object of order.</param>
     /// <response code="200">Created order.</response>
     [HttpPost]
+    [Authorize(Roles = "User")]
     [ProducesResponseType(typeof(ReadOrderDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto createOrderDto)
     {
@@ -46,6 +47,7 @@ public class Controller : ControllerBase
     /// <summary>Get orders.</summary>
     /// <response code="200">Orders received.</response>
     [HttpGet]
+    [Authorize(Roles = "Admin, Worker")]
     [ProducesResponseType(typeof(ReadOrderDto[]),StatusCodes.Status200OK)]
     public async Task<IActionResult> GetOrders()
     {
@@ -78,6 +80,7 @@ public class Controller : ControllerBase
     /// <response code="204">Updated order.</response>
     /// <response code="404">Order with specified id was not found.</response>
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Admin, User")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateOrder([FromRoute] Guid id,UpdateOrderDto updateOrderDto)
@@ -101,6 +104,7 @@ public class Controller : ControllerBase
     /// <response code="200">Deleted order.</response>
     /// <response code="404">Order with specified id was not found.</response>
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(ReadOrderDto),StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteOrder([FromRoute] Guid id)
