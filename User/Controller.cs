@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Orders.Helpers;
+using Orders.Services;
 
 namespace Orders.User;
 
@@ -12,22 +13,27 @@ namespace Orders.User;
 [Produces(MediaTypeNames.Application.Json)]
 public class UserController : ControllerBase
 {
+    private readonly IUserService _userService;
     private readonly DatabaseContext _context;
     private readonly IConfiguration _configuration;
     private readonly JwtTokenHelper _jwtTokenHelper;
 
-    public UserController(DatabaseContext context, IConfiguration configuration, JwtTokenHelper jwtTokenHelper)
+    public UserController(DatabaseContext context,
+        IConfiguration configuration,
+        JwtTokenHelper jwtTokenHelper,
+        IUserService service)
     {
         _context = context;
         _configuration = configuration;
         _jwtTokenHelper = jwtTokenHelper;
+        _userService = service;
     }
 
     [HttpGet("[action]")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetAllUsers()
     {
-        var users = await _context.Users.ToListAsync();
+        var users = await _userService.GetAllAsync();
         return Ok(users);
     }
 
@@ -38,14 +44,9 @@ public class UserController : ControllerBase
         var subClaim = User.Claims.Single(claim => claim.Type == "sub");
         var currentUserId = Guid.Parse(subClaim.Value);
 
-        var currentUser = await _context.Users.SingleAsync(user => user.Id == currentUserId);
+        var currentUser = await _userService.GetByIdAsync(currentUserId);
 
-        var readDto = new ReadUserDto
-        {
-            Id = currentUser.Id,
-            DisplayName = currentUser.DisplayName,
-            Username = currentUser.Username
-        };
+        var readDto = currentUser.Map();
 
         return Ok(readDto);
     }
@@ -59,26 +60,15 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> RegisterNewUser([FromBody] RegisterUserDto registerUserDto)
     {
-        var usernameTaken = await _context.Users.AnyAsync(user => user.Username == registerUserDto.Username);
+        var usernameTaken = await _userService.IsExist(registerUserDto.Username);
         if (usernameTaken)
             return Conflict("Username already taken.");
-        
-        var newUser = new UserEntity
-        {
-            Id = Guid.NewGuid(),
-            DisplayName = registerUserDto.DisplayName,
-            Username = registerUserDto.Username,
-            Password = BCrypt.Net.BCrypt.HashPassword(registerUserDto.Password)
-        };
-        _context.Users.Add(newUser);
-        await _context.SaveChangesAsync();
 
-        var readUserDto = new ReadUserDto
-        {
-            Id = newUser.Id,
-            DisplayName = newUser.DisplayName,
-            Username = newUser.Username
-        };
+        var newUser = registerUserDto.Map();
+        _userService.Create(newUser);
+        await _userService.SaveAsync();
+
+        var readUserDto = newUser.Map();
         
         return Ok(readUserDto);
     }
@@ -94,7 +84,8 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> AuthenticateUser([FromBody] AuthenticateUserDto authUserDto)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == authUserDto.Username);
+        // var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == authUserDto.Username);
+        var user = await _userService.GetByNameAsync(authUserDto.Username);
         if (user is null)
             return NotFound();
         
@@ -110,14 +101,10 @@ public class UserController : ControllerBase
         };
 
         _context.RefreshTokens.Add(refreshTokenEntity);
-        await _context.SaveChangesAsync();
+        await _userService.SaveAsync();
 
         var tokenPair = _jwtTokenHelper.IssuerTokenPair(user.Id, refreshTokenEntity.Id, user.Roles);
-        var tokenPairDto = new TokenPairDto
-        {
-            AccessToken = tokenPair.AccessToken,
-            RefreshToken = tokenPair.RefreshToken
-        };
+        var tokenPairDto = tokenPair.Map();
         return Ok(tokenPairDto);
     }
 
@@ -165,11 +152,7 @@ public class UserController : ControllerBase
         await _context.SaveChangesAsync();
 
         var tokenPair = _jwtTokenHelper.IssuerTokenPair(userId, newRefreshTokenEntity.Id,userRoles);
-        var tokenPairDto = new TokenPairDto
-        {
-            AccessToken = tokenPair.AccessToken,
-            RefreshToken = tokenPair.RefreshToken
-        };
+        var tokenPairDto = tokenPair.Map();
         return Ok(tokenPairDto);
     }
 }

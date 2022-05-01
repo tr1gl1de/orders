@@ -2,6 +2,7 @@ using System.Net.Mime;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Orders.Services;
 
 namespace Orders.Order;
 
@@ -12,11 +13,11 @@ namespace Orders.Order;
 [Produces(MediaTypeNames.Application.Json)]
 public class Controller : ControllerBase
 {
-    private readonly DatabaseContext _context;
+    private readonly IOrderService _orderService;
 
-    public Controller(DatabaseContext context)
+    public Controller(IOrderService orderService)
     {
-        _context = context;
+        _orderService = orderService;
     }
 
     /// <summary>Create a new order.</summary>
@@ -27,20 +28,11 @@ public class Controller : ControllerBase
     [ProducesResponseType(typeof(ReadOrderDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto createOrderDto)
     {
-        var newOrder = new OrderEntity
-        {
-            Id = Guid.NewGuid(),
-            AddressReceiver = createOrderDto.AddressReceiver,
-            AddressSender = createOrderDto.AddressSender,
-            CityReceiver = createOrderDto.CityReceiver,
-            CitySender = createOrderDto.CitySender,
-            Weight = createOrderDto.Weight,
-            DateReceiving = DateTime.Now
-        };
-        _context.Orders.Add(newOrder);
-        await _context.SaveChangesAsync();
+        var newOrder = createOrderDto.Map();
+        _orderService.Create(newOrder);
+        await _orderService.SaveAsync();
 
-        var readOrderDto = newOrder.ToReadOrderDto();
+        var readOrderDto = newOrder.Map();
         return Ok(readOrderDto);
     }
 
@@ -51,8 +43,8 @@ public class Controller : ControllerBase
     [ProducesResponseType(typeof(ReadOrderDto[]),StatusCodes.Status200OK)]
     public async Task<IActionResult> GetOrders()
     {
-        var orders = await _context.Orders.ToListAsync();
-        var readOrderDto = orders.Select(order => order.ToReadOrderDto());
+        var orders = await _orderService.GetAllAsync();
+        var readOrderDto = orders.Select(order => order.Map());
 
         return Ok(readOrderDto);
     }
@@ -66,11 +58,11 @@ public class Controller : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetOrder([FromRoute] Guid id)
     {
-        var order = await _context.Orders.SingleOrDefaultAsync(order => order.Id == id);
+        var order = await _orderService.GetByIdAsync(id);
         if (order is null)
             return NotFound();
 
-        var readOrderDto = order.ToReadOrderDto();
+        var readOrderDto = order.Map();
         return Ok(readOrderDto);
     }
 
@@ -85,17 +77,12 @@ public class Controller : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateOrder([FromRoute] Guid id,UpdateOrderDto updateOrderDto)
     {
-        var oldOrder = await _context.Orders.SingleOrDefaultAsync(order => order.Id == id);
+        var oldOrder = await _orderService.GetByIdAsync(id);
         if (oldOrder is null)
             return NotFound();
-        
-        oldOrder.AddressReceiver = updateOrderDto.AddressReceiver;
-        oldOrder.AddressSender = updateOrderDto.AddressSender;
-        oldOrder.CityReceiver = updateOrderDto.CityReceiver;
-        oldOrder.CitySender = updateOrderDto.CitySender;
-        oldOrder.Weight = updateOrderDto.Weight;
-        
-        await _context.SaveChangesAsync();
+        oldOrder = updateOrderDto.Map();
+
+        await _orderService.SaveAsync();
         return NoContent();
     }
 
@@ -109,12 +96,12 @@ public class Controller : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteOrder([FromRoute] Guid id)
     {
-        var deleteOrder = await _context.Orders.SingleOrDefaultAsync(order => order.Id == id);
+        var deleteOrder = await _orderService.GetByIdAsync(id);
         if (deleteOrder is null)
             return NotFound();
-        _context.Orders.Remove(deleteOrder);
-        await _context.SaveChangesAsync();
-        var readOrderDto = deleteOrder.ToReadOrderDto();
+        _orderService.Delete(deleteOrder);
+        await _orderService.SaveAsync();
+        var readOrderDto = deleteOrder.Map();
         return Ok(readOrderDto);
     }
 }
