@@ -8,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using Orders;
 using Orders.Filters;
 using Orders.Helpers;
+using Orders.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -67,6 +68,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         tokenHandler.OutboundClaimTypeMap.Clear();
     });
 builder.Services.AddScoped<JwtTokenHelper>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
