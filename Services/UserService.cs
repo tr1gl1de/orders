@@ -17,7 +17,7 @@ class UserService : IUserService
         return await context.Users.ToListAsync();
     }
 
-    public async Task<UserEntity> GetByIdAsync(Guid id)
+    public async Task<UserEntity?> GetByIdAsync(Guid id)
     {
         return await context.Users.SingleAsync(user => user.Id == id);
     }
